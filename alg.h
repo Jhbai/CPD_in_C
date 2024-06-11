@@ -27,33 +27,34 @@ int** default_2d_arr(int n_size){
 }
 
 int* PELT(double* data, int n_size, double penalty){
+	// Cost Variable Assignment
 	double c;
-	int temp_size = 0;
 
-	double* F = (double *)malloc(sizeof(double)*(n_size+1)); // Total Cost
+	// Total Cost
+	double* F = (double *)malloc(sizeof(double)*(n_size+1));
 	for(int i = 0; i <= n_size; ++i)F[i] = DBL_MAX;
-	F[0] = 0;
+	F[0] = -penalty;
 	
-	int** cps = default_2d_arr(n_size + 1); // Change Points
+	// Change Points
+	int** cps = default_2d_arr(n_size + 1);
 
-
-	for(int t = 1; t <= n_size; t++){ // Start Algorithm
+	// Start Algorithm
+	for(int t = 1; t <= n_size; t++){
 		for(int s = 0; s < t; ++s){
 			c = cost(data, s, t-1);
 			if(F[s] + c + penalty < F[t]){
 				F[t] = F[s] + c + penalty;
-				if(temp_size > 0){
-					memcpy(cps[t], cps[s], temp_size*sizeof(int));
-					cps[t][temp_size] = t;
-					temp_size ++;
-				}
-				else{
-					cps[t][0] = t;
-					temp_size ++;
-				}
+				for(int i = 0; i < s+1; i++)cps[t][i] = cps[s][i];
+				cps[t][s] = t;
 			}
 		}
 	}
+	int* res = cps[n_size];
+	
+	// Free the memory
 	free(F);
-	return cps[n_size];
+	for(int i = 0; i < n_size-1; ++i)free(cps[i]);
+	free(cps);
+
+	return res;
 }
